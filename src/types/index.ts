@@ -51,6 +51,9 @@ export interface AppState {
   settingsOpen: boolean;
   historyOpen: boolean;
   history: HistoryEntry[];
+  analysisOpen: boolean;
+  vocabOpen: boolean;
+  vocab: VocabEntry[];
 }
 
 export type AppAction =
@@ -67,4 +70,41 @@ export type AppAction =
   | { type: 'TOGGLE_SETTINGS' }
   | { type: 'TOGGLE_HISTORY' }
   | { type: 'ADD_HISTORY'; text: string }
-  | { type: 'SET_VOICE'; voiceName: string };
+  | { type: 'SET_VOICE'; voiceName: string }
+  | { type: 'TOGGLE_ANALYSIS' }
+  | { type: 'TOGGLE_VOCAB' }
+  | { type: 'ADD_VOCAB'; word: string; ipa: string | null; translation: string | null }
+  | { type: 'REMOVE_VOCAB'; word: string };
+
+// ---- Repetition Radar ----
+
+export interface WordFrequency {
+  word: string;
+  count: number;
+  level: 'overused' | 'warning' | 'normal';
+}
+
+// ---- Pause Heatmap ----
+
+export interface SilenceSegment {
+  startMs: number;
+  durationMs: number;
+  ratio: number; // 0-1 position in total recording
+}
+
+// ---- Topic Vocabulary Net ----
+
+export interface TopicVocab {
+  topic: string;
+  keywords: string[];
+  phrases: string[];
+}
+
+// ---- Vocabulary Notebook ----
+
+export interface VocabEntry {
+  word: string;
+  ipa: string | null;
+  translation: string | null;
+  time: number;
+}

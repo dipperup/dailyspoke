@@ -1,9 +1,10 @@
 import { createContext, useContext, useReducer } from 'react';
-import type { AppState, AppAction, HistoryEntry } from '../types';
+import type { AppState, AppAction, HistoryEntry, VocabEntry } from '../types';
 import { parseSentences } from '../utils/sentenceSplitter';
 
 const LS_DS = 'dailyspoke_ds';
 const LS_HIST = 'dailyspoke_hist';
+const LS_VOCAB = 'dailyspoke_vocab';
 const MAX_HISTORY = 50;
 
 function loadSettings(): { key: string; model: string } {
@@ -19,6 +20,13 @@ function loadHistory(): HistoryEntry[] {
 }
 function saveHistory(h: HistoryEntry[]) {
   try { localStorage.setItem(LS_HIST, JSON.stringify(h.slice(0, MAX_HISTORY))); } catch { /* ignore */ }
+}
+function loadVocab(): VocabEntry[] {
+  try { const raw = localStorage.getItem(LS_VOCAB); if (raw) return JSON.parse(raw); } catch { /* ignore */ }
+  return [];
+}
+function saveVocab(v: VocabEntry[]) {
+  try { localStorage.setItem(LS_VOCAB, JSON.stringify(v)); } catch { /* ignore */ }
 }
 
 const initialPlayback = () => ({
@@ -148,6 +156,31 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, history: deduped };
     }
 
+    case 'TOGGLE_ANALYSIS':
+      return { ...state, analysisOpen: !state.analysisOpen };
+
+    case 'TOGGLE_VOCAB':
+      return { ...state, vocabOpen: !state.vocabOpen };
+
+    case 'ADD_VOCAB': {
+      const v = [...state.vocab];
+      // dedupe, update translation if already exists
+      const idx = v.findIndex(e => e.word === action.word);
+      if (idx >= 0) {
+        v[idx] = { ...v[idx], ipa: action.ipa ?? v[idx].ipa, translation: action.translation ?? v[idx].translation, time: Date.now() };
+      } else {
+        v.unshift({ word: action.word, ipa: action.ipa, translation: action.translation, time: Date.now() });
+      }
+      saveVocab(v);
+      return { ...state, vocab: v };
+    }
+
+    case 'REMOVE_VOCAB': {
+      const v2 = state.vocab.filter(e => e.word !== action.word);
+      saveVocab(v2);
+      return { ...state, vocab: v2 };
+    }
+
     case 'SET_VOICE':
       return { ...state, voiceName: action.voiceName };
 
@@ -166,6 +199,9 @@ const initialState: AppState = {
   deepseek: { key: saved.key, model: saved.model },
   settingsOpen: false,
   historyOpen: false,
+  analysisOpen: false,
+  vocabOpen: false,
+  vocab: loadVocab(),
   history: loadHistory(),
 };
 

@@ -1,6 +1,7 @@
 interface Props {
   isPlaying: boolean;
   isLooping: boolean;
+  isGenerating?: boolean;
   onPlay: () => void;
   onStop: () => void;
   onToggleLoop: () => void;
@@ -9,6 +10,7 @@ interface Props {
 export default function AudioControls({
   isPlaying,
   isLooping,
+  isGenerating,
   onPlay,
   onStop,
   onToggleLoop,
@@ -16,15 +18,26 @@ export default function AudioControls({
   return (
     <div className="flex items-center gap-2">
       {isPlaying ? (
-        <button
-          className="px-3 py-1.5 text-sm font-medium rounded-lg
-                     bg-[#FF453A] text-white
-                     transition-all duration-200 ease-in-out
-                     hover:scale-[1.02] active:scale-[0.98]"
-          onClick={onStop}
-        >
-          Stop
-        </button>
+        isGenerating ? (
+          <button
+            className="px-3 py-1.5 text-sm font-medium rounded-lg
+                       bg-[#38383C] text-[#8A8A8E] border border-[#38383C]
+                       animate-pulse cursor-not-allowed"
+            disabled
+          >
+            Generating...
+          </button>
+        ) : (
+          <button
+            className="px-3 py-1.5 text-sm font-medium rounded-lg
+                       bg-[#FF453A] text-white
+                       transition-all duration-200 ease-in-out
+                       hover:scale-[1.02] active:scale-[0.98]"
+            onClick={onStop}
+          >
+            Stop
+          </button>
+        )
       ) : (
         <button
           className="px-3 py-1.5 text-sm font-medium rounded-lg

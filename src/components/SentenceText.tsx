@@ -4,10 +4,11 @@ import WordSpan from './WordSpan';
 interface Props {
   words: WordToken[];
   playback: PlaybackState;
-  onWordClick: (charStart: number) => void;
+  onReadFrom: (charStart: number) => void;
+  onAddVocab: (word: WordToken) => void;
 }
 
-export default function SentenceText({ words, playback, onWordClick }: Props) {
+export default function SentenceText({ words, playback, onReadFrom, onAddVocab }: Props) {
   return (
     <div className="flex flex-wrap gap-x-1 gap-y-0.5 items-baseline">
       {words.map((word, i) => {
@@ -21,7 +22,8 @@ export default function SentenceText({ words, playback, onWordClick }: Props) {
             key={`${word.charStart}-${i}`}
             word={word}
             isActive={isActive}
-            onClick={() => onWordClick(word.charStart)}
+            onReadFrom={() => onReadFrom(word.charStart)}
+            onAddVocab={() => onAddVocab(word)}
           />
         );
       })}
